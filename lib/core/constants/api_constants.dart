@@ -10,4 +10,8 @@ class ApiConstants {
 
   static String detailUrl(String imdbId) =>
       '$omdbBaseUrl?apikey=$omdbApiKey&i=$imdbId&plot=full';
+
+  // Default popular movie search term - since OMDb doesn't have popular endpoint
+  static String popularMoviesUrl(int page) =>
+      '$omdbBaseUrl?apikey=$omdbApiKey&s=marvel&page=$page&type=movie';
 }

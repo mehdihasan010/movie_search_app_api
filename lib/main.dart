@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'features/movie_search/presentation/pages/movie_search_page.dart';
+import 'features/movie_search/presentation/pages/home_page.dart';
 import 'injection_container.dart' as di;
 import 'injection_container.dart';
 import 'core/themes/app_theme.dart';
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Movie Search App',
         theme: AppTheme.getTheme(),
-        home: const MovieSearchPage(),
+        home: const HomePage(),
       ),
     );
   }

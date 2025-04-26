@@ -11,6 +11,7 @@ import 'features/movie_search/domain/usecases/get_movie_details.dart';
 import 'features/movie_search/domain/usecases/search_movies.dart';
 import 'features/movie_search/presentation/providers/movie_detail_provider.dart';
 import 'features/movie_search/presentation/providers/movie_search_provider.dart';
+import 'features/movie_search/presentation/providers/home_provider.dart';
 
 final sl = GetIt.instance; // Service Locator instance
 
@@ -44,6 +45,10 @@ List<SingleChildWidget> createProviders() {
     // Create MovieDetailProvider here as well, so it's available for the detail page
     ChangeNotifierProvider(
       create: (_) => MovieDetailProvider(getMovieDetailsUseCase: sl()),
+    ),
+    // Add HomeProvider
+    ChangeNotifierProvider(
+      create: (_) => HomeProvider(searchMoviesUseCase: sl()),
     ),
   ];
 }
