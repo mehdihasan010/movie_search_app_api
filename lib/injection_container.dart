@@ -13,10 +13,14 @@ import 'features/movie_search/presentation/providers/movie_detail_provider.dart'
 import 'features/movie_search/presentation/providers/movie_search_provider.dart';
 import 'features/movie_search/presentation/providers/home_provider.dart';
 import 'features/movie_search/presentation/providers/favorites_provider.dart';
+import 'core/network/connectivity_service.dart';
 
 final sl = GetIt.instance; // Service Locator instance
 
 Future<void> init() async {
+  // Core
+  sl.registerLazySingleton(() => ConnectivityService());
+
   // UseCases
   sl.registerLazySingleton(() => SearchMovies(sl()));
   sl.registerLazySingleton(() => GetMovieDetails(sl()));
@@ -54,6 +58,10 @@ List<SingleChildWidget> createProviders() {
     // Add FavoritesProvider
     ChangeNotifierProvider(
       create: (_) => FavoritesProvider(),
+    ),
+    // Add Network Connectivity Provider
+    Provider<ConnectivityService>.value(
+      value: sl<ConnectivityService>(),
     ),
   ];
 }
