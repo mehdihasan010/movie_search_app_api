@@ -9,7 +9,12 @@ class HomeProvider extends ChangeNotifier {
 
   HomeProvider({required this.searchMoviesUseCase}) {
     scrollController.addListener(_onScroll);
+    searchController.addListener(_onSearchTextChanged);
   }
+
+  // Track if search text has changed for UI updates
+  String _previousSearchText = '';
+  bool get hasSearchQuery => searchController.text.trim().isNotEmpty;
 
   MovieSearchProvider? _movieSearchProvider;
 
@@ -19,10 +24,21 @@ class HomeProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    searchController.removeListener(_onSearchTextChanged);
     searchController.dispose();
     scrollController.removeListener(_onScroll);
     scrollController.dispose();
     super.dispose();
+  }
+
+  void _onSearchTextChanged() {
+    // Only notify listeners if the trimmed search text has changed
+    // This avoids unnecessary rebuilds
+    final currentText = searchController.text.trim();
+    if (currentText != _previousSearchText) {
+      _previousSearchText = currentText;
+      notifyListeners();
+    }
   }
 
   void _onScroll() {
@@ -49,5 +65,11 @@ class HomeProvider extends ChangeNotifier {
     if (query.isNotEmpty) {
       _movieSearchProvider?.searchMovies(query);
     }
+  }
+
+  void clearSearch() {
+    searchController.clear();
+    // Consider if you want to reload popular movies or leave current results
+    // loadPopularMovies();
   }
 }

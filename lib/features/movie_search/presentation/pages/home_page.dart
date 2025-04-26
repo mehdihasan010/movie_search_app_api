@@ -73,17 +73,37 @@ class HomePage extends StatelessWidget {
                     controller: homeProvider.searchController,
                     decoration: InputDecoration(
                       hintText: 'Search movies by title...',
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.search),
-                        onPressed: () {
-                          homeProvider.performSearch();
-                          FocusScope.of(context).unfocus();
-                        },
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 16),
+                      suffixIcon: homeProvider.searchController.text.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                homeProvider.searchController.clear();
+                                // Don't initiate a new search when clearing
+                              },
+                            )
+                          : IconButton(
+                              icon: const Icon(Icons.search),
+                              onPressed: () {
+                                if (homeProvider.searchController.text
+                                    .trim()
+                                    .isNotEmpty) {
+                                  homeProvider.performSearch();
+                                  FocusScope.of(context).unfocus();
+                                }
+                              },
+                            ),
                     ),
-                    onSubmitted: (_) {
-                      homeProvider.performSearch();
-                      FocusScope.of(context).unfocus();
+                    onSubmitted: (query) {
+                      if (query.trim().isNotEmpty) {
+                        homeProvider.performSearch();
+                        FocusScope.of(context).unfocus();
+                      }
                     },
                     textInputAction: TextInputAction.search,
                   ),
