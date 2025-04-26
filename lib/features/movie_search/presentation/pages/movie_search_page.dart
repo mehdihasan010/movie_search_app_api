@@ -69,7 +69,6 @@ class _MovieSearchPageState extends State<MovieSearchPage> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search movies by title...',
-                prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
