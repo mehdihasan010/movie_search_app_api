@@ -90,8 +90,11 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
             case DetailState.loaded:
               final movie = provider.movieDetail;
               if (movie == null) {
-                return const ErrorMessageWidget(
-                    message: 'Movie data not available.');
+                return ErrorMessageWidget(
+                    message: 'Movie data not available.',
+                    onRetry: () {
+                      provider.fetchMovieDetails(widget.imdbId);
+                    });
               }
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
