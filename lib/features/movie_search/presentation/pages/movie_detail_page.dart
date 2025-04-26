@@ -172,15 +172,6 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                       textAlign: TextAlign.justify,
                     ),
                     const SizedBox(height: 30),
-
-                    // Back Button (Alternative)
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Back to Search'),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
                   ],
                 ),
               );

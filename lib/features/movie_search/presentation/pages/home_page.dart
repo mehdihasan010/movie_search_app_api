@@ -73,7 +73,6 @@ class HomePage extends StatelessWidget {
                     controller: homeProvider.searchController,
                     decoration: InputDecoration(
                       hintText: 'Search movies by title...',
-                      prefixIcon: const Icon(Icons.search),
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.search),
                         onPressed: () {
