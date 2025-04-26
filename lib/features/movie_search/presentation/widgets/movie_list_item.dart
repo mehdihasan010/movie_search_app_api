@@ -1,18 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/widgets/cached_image_with_shimmer.dart';
 import '../../domain/entities/movie_search_result.dart';
+import '../providers/favorites_provider.dart';
 
 class MovieListItem extends StatelessWidget {
   final MovieSearchResult movie;
   final VoidCallback onTap;
+  final bool showFavoriteIcon;
+  final bool? isFavorite;
 
   const MovieListItem({
     super.key,
     required this.movie,
     required this.onTap,
+    this.showFavoriteIcon = false,
+    this.isFavorite,
   });
 
   @override
   Widget build(BuildContext context) {
+    final favoritesProvider =
+        showFavoriteIcon ? Provider.of<FavoritesProvider>(context) : null;
+
+    final isMovieFavorite =
+        isFavorite ?? (favoritesProvider?.isFavorite(movie.imdbId) ?? false);
+
     return Card(
       elevation: 3,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -31,38 +44,12 @@ class MovieListItem extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                   color: Colors.grey[300],
                 ),
-                child: ClipRRect(
+                child: CachedImageWithShimmer(
+                  imageUrl: movie.posterUrl,
+                  width: 80,
+                  height: 120,
                   borderRadius: BorderRadius.circular(8),
-                  child: movie.posterUrl.isNotEmpty && movie.posterUrl != 'N/A'
-                      ? Image.network(
-                          movie.posterUrl,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              const Icon(
-                            Icons.movie_creation_outlined,
-                            size: 40,
-                            color: Colors.grey,
-                          ),
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Center(
-                              child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes !=
-                                        null
-                                    ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
-                                    : null,
-                              ),
-                            );
-                          },
-                        )
-                      : const Center(
-                          child: Icon(
-                            Icons.movie_creation_outlined,
-                            size: 40,
-                            color: Colors.grey,
-                          ),
-                        ),
+                  fit: BoxFit.cover,
                 ),
               ),
               const SizedBox(width: 16),
@@ -97,6 +84,18 @@ class MovieListItem extends StatelessWidget {
                   ],
                 ),
               ),
+
+              // Favorite Icon
+              if (showFavoriteIcon && favoritesProvider != null)
+                IconButton(
+                  icon: Icon(
+                    isMovieFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: isMovieFavorite ? Colors.red : null,
+                  ),
+                  onPressed: () {
+                    favoritesProvider.toggleFavorite(movie);
+                  },
+                ),
             ],
           ),
         ),

@@ -23,6 +23,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: createProviders(),
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Movie Search App',
         theme: AppTheme.getTheme(),
         home: const HomePage(),

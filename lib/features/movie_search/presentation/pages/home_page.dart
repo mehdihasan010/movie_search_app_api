@@ -8,6 +8,7 @@ import '../widgets/movie_list_item.dart';
 import '../widgets/movie_poster_card.dart';
 import 'movie_detail_page.dart';
 import 'movie_search_page.dart';
+import 'favorites_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -32,6 +33,10 @@ class HomePage extends StatelessWidget {
         title: const Text('Movie App'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.favorite),
+            onPressed: () => _navigateToFavoritesPage(context),
+          ),
+          IconButton(
             icon: const Icon(Icons.search),
             onPressed: () => _navigateToSearchPage(context),
           ),
@@ -51,7 +56,8 @@ class HomePage extends StatelessWidget {
             );
           }
 
-          if (provider.movies.isEmpty) {
+          if (provider.movies.isEmpty ||
+              provider.state == SearchState.noResults) {
             return const Center(child: Text('No movies available'));
           }
 
@@ -123,23 +129,28 @@ class HomePage extends StatelessWidget {
                 ListView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  itemCount: provider.movies.length,
+                  itemCount: provider.movies.length +
+                      (provider.state == SearchState.loadingMore ? 1 : 0),
                   itemBuilder: (context, index) {
+                    if (index >= provider.movies.length) {
+                      // If it's the extra item and we are loading more, show indicator
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.0),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
                     final movie = provider.movies[index];
                     return MovieListItem(
                       movie: movie,
                       onTap: () =>
                           _navigateToMovieDetailPage(context, movie.imdbId),
+                      showFavoriteIcon: true,
                     );
                   },
                 ),
 
-                // Loading indicator for more movies
-                if (provider.state == SearchState.loadingMore)
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.0),
-                    child: Center(child: LoadingWidget()),
-                  ),
+                // Spacer at the bottom to allow scrolling past the last item
+                const SizedBox(height: 24.0),
               ],
             ),
           );
@@ -162,6 +173,15 @@ class HomePage extends StatelessWidget {
       context,
       MaterialPageRoute(
         builder: (_) => const MovieSearchPage(),
+      ),
+    );
+  }
+
+  void _navigateToFavoritesPage(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const FavoritesPage(),
       ),
     );
   }

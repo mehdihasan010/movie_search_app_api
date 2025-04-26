@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/widgets/cached_image_with_shimmer.dart';
 import '../providers/movie_detail_provider.dart';
+import '../providers/favorites_provider.dart';
 import '../widgets/loading_widget.dart';
 import '../widgets/error_message_widget.dart';
+import '../../data/models/movie_search_result_model.dart';
 
 class MovieDetailPage extends StatefulWidget {
   final String imdbId;
@@ -25,6 +28,9 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    final favoritesProvider = Provider.of<FavoritesProvider>(context);
+    final bool isFavorite = favoritesProvider.isFavorite(widget.imdbId);
+
     return Scaffold(
       appBar: AppBar(
         title: Consumer<MovieDetailProvider>(
@@ -41,6 +47,34 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          // Favorite Button
+          Consumer<MovieDetailProvider>(
+            builder: (context, provider, child) {
+              if (provider.state == DetailState.loaded &&
+                  provider.movieDetail != null) {
+                return IconButton(
+                  icon: Icon(
+                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: isFavorite ? Colors.red : null,
+                  ),
+                  onPressed: () {
+                    final movie = provider.movieDetail!;
+                    // Convert movie detail to movie search result for toggling
+                    final movieResult = MovieSearchResultModel(
+                      title: movie.title,
+                      year: movie.year,
+                      imdbId: movie.imdbId,
+                      posterUrl: movie.posterUrl,
+                    );
+                    favoritesProvider.toggleFavorite(movieResult);
+                  },
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
       ),
       body: Consumer<MovieDetailProvider>(
         builder: (context, provider, child) {
@@ -70,56 +104,46 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                         constraints: BoxConstraints(
                           maxHeight: MediaQuery.of(context).size.height * 0.5,
                         ),
-                        child: ClipRRect(
+                        child: CachedImageWithShimmer(
+                          imageUrl: movie.posterUrl,
                           borderRadius: BorderRadius.circular(12.0),
-                          child: movie.posterUrl.isNotEmpty &&
-                                  movie.posterUrl != 'N/A'
-                              ? Image.network(
-                                  movie.posterUrl,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      Container(
-                                    height: 300,
-                                    color: Colors.grey[300],
-                                    child: const Center(
-                                        child: Icon(
-                                            Icons.movie_creation_outlined,
-                                            size: 60,
-                                            color: Colors.grey)),
-                                  ),
-                                  loadingBuilder:
-                                      (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return Container(
-                                      height: 300,
-                                      color: Colors.grey[300],
-                                      child: const Center(
-                                          child: CircularProgressIndicator()),
-                                    );
-                                  },
-                                )
-                              : Container(
-                                  height: 300,
-                                  width: 200,
-                                  decoration: BoxDecoration(
-                                      color: Colors.grey[300],
-                                      borderRadius: BorderRadius.circular(12)),
-                                  child: const Center(
-                                      child: Icon(Icons.movie_creation_outlined,
-                                          size: 60, color: Colors.grey)),
-                                ),
+                          fit: BoxFit.contain,
+                          width: 300,
+                          height: MediaQuery.of(context).size.height * 0.5,
                         ),
                       ),
                     ),
                     const SizedBox(height: 24),
 
-                    // Title
-                    Text(
-                      movie.title,
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.bold),
+                    // Title and Favorite button
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            movie.title,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            color: isFavorite ? Colors.red : null,
+                            size: 30,
+                          ),
+                          onPressed: () {
+                            final movieResult = MovieSearchResultModel(
+                              title: movie.title,
+                              year: movie.year,
+                              imdbId: movie.imdbId,
+                              posterUrl: movie.posterUrl,
+                            );
+                            favoritesProvider.toggleFavorite(movieResult);
+                          },
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 8),
 

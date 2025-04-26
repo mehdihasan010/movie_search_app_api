@@ -12,6 +12,7 @@ import 'features/movie_search/domain/usecases/search_movies.dart';
 import 'features/movie_search/presentation/providers/movie_detail_provider.dart';
 import 'features/movie_search/presentation/providers/movie_search_provider.dart';
 import 'features/movie_search/presentation/providers/home_provider.dart';
+import 'features/movie_search/presentation/providers/favorites_provider.dart';
 
 final sl = GetIt.instance; // Service Locator instance
 
@@ -49,6 +50,10 @@ List<SingleChildWidget> createProviders() {
     // Add HomeProvider
     ChangeNotifierProvider(
       create: (_) => HomeProvider(searchMoviesUseCase: sl()),
+    ),
+    // Add FavoritesProvider
+    ChangeNotifierProvider(
+      create: (_) => FavoritesProvider(),
     ),
   ];
 }

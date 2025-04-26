@@ -1,18 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../../../core/widgets/cached_image_with_shimmer.dart';
 import '../../domain/entities/movie_search_result.dart';
+import '../providers/favorites_provider.dart';
 
 class MoviePosterCard extends StatelessWidget {
   final MovieSearchResult movie;
   final VoidCallback onTap;
+  final bool showFavoriteIcon;
 
   const MoviePosterCard({
     super.key,
     required this.movie,
     required this.onTap,
+    this.showFavoriteIcon = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    final favoritesProvider = Provider.of<FavoritesProvider>(context);
+    final isFavorite = favoritesProvider.isFavorite(movie.imdbId);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: InkWell(
@@ -21,52 +29,57 @@ class MoviePosterCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Poster
-            Container(
-              width: 120,
-              height: 140,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: Colors.grey[300],
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(51),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: movie.posterUrl.isNotEmpty && movie.posterUrl != 'N/A'
-                    ? Image.network(
-                        movie.posterUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(
-                          Icons.movie_creation_outlined,
-                          size: 40,
-                          color: Colors.grey,
-                        ),
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                  : null,
-                            ),
-                          );
-                        },
-                      )
-                    : const Center(
-                        child: Icon(
-                          Icons.movie_creation_outlined,
-                          size: 40,
-                          color: Colors.grey,
-                        ),
+            Stack(
+              children: [
+                Container(
+                  width: 120,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.grey[300],
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withAlpha(51),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
                       ),
-              ),
+                    ],
+                  ),
+                  child: CachedImageWithShimmer(
+                    imageUrl: movie.posterUrl,
+                    width: 120,
+                    height: 140,
+                    borderRadius: BorderRadius.circular(8),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                if (showFavoriteIcon)
+                  Positioned(
+                    top: 5,
+                    right: 5,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        iconSize: 20,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(
+                          minWidth: 30,
+                          minHeight: 30,
+                        ),
+                        icon: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorite ? Colors.red : Colors.white,
+                        ),
+                        onPressed: () {
+                          favoritesProvider.toggleFavorite(movie);
+                        },
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 8),
             // Title
